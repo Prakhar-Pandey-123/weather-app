@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  
+  <!-- Inline CSS -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    #weather-info {
+      margin-bottom: 20px;
+    }
+
+    #temperature {
+      font-size: 2em;
+      margin: 10px 0;
+    }
+
+    .search-section {
+      margin-top: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 70%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Local Weather Application</h1>
+    <div id="weather-info">
+      <h2 id="location">Fetching location...</h2>
+      <p id="temperature"></p>
+      <p id="description"></p>
+    </div>
+
+    <div class="search-section">
+      <input type="text" id="city-input" placeholder="Enter city name">
+      <button id="search-btn">Get Weather</button>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script>
+    const apiKey = "54dd3bbd72dafe4f688c03d6c0864860";
+    const weatherInfo = document.getElementById('weather-info');
+    const locationEl = document.getElementById('location');
+    const tempEl = document.getElementById('temperature');
+    const descEl = document.getElementById('description');
+
+    // Get user's location
+    navigator.geolocation.getCurrentPosition(success, error);
+
+    function success(position) {
+      const { latitude, longitude } = position.coords;
+      fetchWeatherByLocation(latitude, longitude);
+    }
+
+    function error() {
+      locationEl.textContent = "Unable to retrieve your location";
+    }
+
+    // Fetch weather by location
+    function fetchWeatherByLocation(lat, lon) {
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => displayWeather(data))
+        .catch(() => {
+          locationEl.textContent = "Unable to fetch weather data.";
+        });
+    }
+
+    // Fetch weather by city
+    document.getElementById('search-btn').addEventListener('click', () => {
+      const city = document.getElementById('city-input').value;
+      if (city) {
+        fetchWeatherByCity(city);
+      }
+    });
+
+    function fetchWeatherByCity(city) {
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => displayWeather(data))
+        .catch(() => {
+          locationEl.textContent = "City not found.";
+        });
+    }
+
+    // Display weather data
+    function displayWeather(data) {
+      const { name } = data;
+      const { temp } = data.main;
+      const { description } = data.weather[0];
+
+      locationEl.textContent = name;
+      tempEl.textContent = `Temperature: ${temp}°C`;
+      descEl.textContent = `Weather: ${description}`;
+    }
+  </script>
+</body>
+</html>
